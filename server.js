@@ -3,16 +3,31 @@ import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
 
+// ---------- ENV SETUP ----------
 dotenv.config();
 
+const REQUIRED_ENV = ["OPENROUTER_API_KEY"];
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    console.error(`❌ Missing environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
+console.log("✅ OPENROUTER_API_KEY loaded");
+
+// ---------- APP SETUP ----------
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL = "stepfun/step-3.5-flash:free";
+const PORT = process.env.PORT || 8000;
 
-// ---------- STRICT PROMPT (NO MOTIVATION) ----------
+// ---------- OPENROUTER CONFIG ----------
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL = "tngtech/deepseek-r1t2-chimera:free";
+
+// ---------- STRICT PROMPT ----------
 function buildTutorPrompt(stats) {
   return `
 You are a strict Data Structures and Algorithms tutor.
@@ -25,22 +40,20 @@ Student LeetCode Statistics:
 - Ranking: ${stats.ranking}
 
 TASKS:
-1. Classify the student's DSA level.
-2. Identify weak areas based on statistics.
+1. Classify DSA level.
+2. Identify weak areas.
 3. Provide a STEP-BY-STEP improvement plan.
-4. Provide a 30-day roadmap (week-wise).
-5. List topics to study in correct order.
-6. Define a daily problem-solving routine.
+4. List topics in correct learning order.
+5. Define a daily problem-solving routine.
 
-STRICT RULES:
-- NO motivation
-- NO encouragement
-- NO praise
-- NO emotional language
-- NO emojis
-- ONLY steps and factual guidance
+RULES:
+- No motivation
+- No praise
+- No encouragement
+- No emotional language
+- No emojis
+- Only steps and factual guidance
 - Use numbered lists and bullet points
-- Be structured and complete
 `;
 }
 
@@ -48,16 +61,55 @@ STRICT RULES:
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "DSA Tutor API running"
+    status: "API running",
+    model: MODEL
   });
 });
 
-// ---------- AI TUTOR ENDPOINT ----------
+// ---------- API KEY VALIDATION ----------
+app.get("/api/check-key", async (req, res) => {
+  try {
+    const test = await fetch(OPENROUTER_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [{ role: "user", content: "Reply with OK" }],
+        temperature: 0
+      })
+    });
+
+    const text = await test.text();
+
+    if (!test.ok) {
+      return res.status(test.status).json({
+        success: false,
+        error: text
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "API key is valid",
+      rawResponse: JSON.parse(text)
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+// ---------- DSA TUTOR ENDPOINT ----------
 app.post("/api/dsa-tutor", async (req, res) => {
   try {
     const stats = req.body;
 
-    // Basic validation
     if (!stats || stats.totalSolved === undefined) {
       return res.status(400).json({
         success: false,
@@ -70,7 +122,7 @@ app.post("/api/dsa-tutor", async (req, res) => {
     const response = await fetch(OPENROUTER_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "http://localhost:8000",
         "X-Title": "DSA AI Tutor"
@@ -86,8 +138,10 @@ app.post("/api/dsa-tutor", async (req, res) => {
     });
 
     const rawText = await response.text();
+    console.log("🔹 OpenRouter status:", response.status);
 
     if (!response.ok) {
+      console.error("🔴 OpenRouter error:", rawText);
       return res.status(response.status).json({
         success: false,
         error: rawText
@@ -96,13 +150,10 @@ app.post("/api/dsa-tutor", async (req, res) => {
 
     const data = JSON.parse(rawText);
 
-    const tutorReply =
-      data?.choices?.[0]?.message?.content || "";
-
     res.json({
       success: true,
       modelUsed: MODEL,
-      tutorReply
+      tutorReply: data?.choices?.[0]?.message?.content || ""
     });
 
   } catch (err) {
@@ -114,8 +165,7 @@ app.post("/api/dsa-tutor", async (req, res) => {
   }
 });
 
-// ---------- START SERVER ----------
-const PORT = process.env.PORT || 8000;
+// ---------- START ----------
 app.listen(PORT, () => {
   console.log(`✅ DSA Tutor API running on http://localhost:${PORT}`);
 });
