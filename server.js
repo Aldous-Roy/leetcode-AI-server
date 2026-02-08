@@ -3,20 +3,18 @@ import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
 
-// ---------- ENV SETUP ----------
 dotenv.config();
 
 const REQUIRED_ENV = ["OPENROUTER_API_KEY"];
 for (const key of REQUIRED_ENV) {
   if (!process.env[key]) {
-    console.error(`❌ Missing environment variable: ${key}`);
+    console.error(`Missing environment variable: ${key}`);
     process.exit(1);
   }
 }
 
-console.log("✅ OPENROUTER_API_KEY loaded");
+console.log("OPENROUTER_API_KEY loaded");
 
-// ---------- APP SETUP ----------
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -27,7 +25,7 @@ const PORT = process.env.PORT || 8000;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL = "tngtech/deepseek-r1t2-chimera:free";
 
-// ---------- STRICT PROMPT ----------
+//promt builder
 function buildTutorPrompt(stats) {
   return `
 You are a strict Data Structures and Algorithms tutor.
@@ -57,7 +55,7 @@ RULES:
 `;
 }
 
-// ---------- HEALTH CHECK ----------
+
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -66,7 +64,7 @@ app.get("/", (req, res) => {
   });
 });
 
-// ---------- API KEY VALIDATION ----------
+
 app.get("/api/check-key", async (req, res) => {
   try {
     const test = await fetch(OPENROUTER_URL, {
@@ -105,7 +103,7 @@ app.get("/api/check-key", async (req, res) => {
   }
 });
 
-// ---------- DSA TUTOR ENDPOINT ----------
+
 app.post("/api/dsa-tutor", async (req, res) => {
   try {
     const stats = req.body;
@@ -165,7 +163,7 @@ app.post("/api/dsa-tutor", async (req, res) => {
   }
 });
 
-// ---------- START ----------
+
 app.listen(PORT, () => {
   console.log(`✅ DSA Tutor API running on http://localhost:${PORT}`);
 });
