@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 8000;
 
 // ---------- OPENROUTER CONFIG ----------
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL = "tngtech/deepseek-r1t2-chimera:free";
+const MODEL = "stepfun/step-3.5-flash:free";
 
 //promt builder
 function buildTutorPrompt(stats) {
