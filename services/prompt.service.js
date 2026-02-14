@@ -49,10 +49,12 @@ STRICT JSON FORMAT REQUIRED:
     "2 <= nums.length <= 104",
     "-109 <= nums[i] <= 109"
   ],
-  "hints": ["Hint 1", "Hint 2"]
+  "hints": ["Hint 1", "Hint 2"],
+  "starterCode": "class Solution { public int[] twoSum(int[] nums, int target) { } }"
 }
 
 Ensure the content matches the real LeetCode problem if it's a known one (like "Two Sum").
+For "starterCode", provide the Java class structure. If helper classes (like TreeNode, ListNode) are needed, include them as comments or class definitions BEFORE the Solution class.
 Return ONLY valid JSON. No conversational text.
 `;
 }
