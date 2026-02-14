@@ -50,12 +50,16 @@ STRICT JSON FORMAT REQUIRED:
     "-109 <= nums[i] <= 109"
   ],
   "hints": ["Hint 1", "Hint 2"],
-  "starterCode": "class Solution { public int[] twoSum(int[] nums, int target) { } }"
+  "starterCode": {
+    "java": "class Solution { public int[] twoSum(int[] nums, int target) { } }",
+    "cpp": "class Solution { public: vector<int> twoSum(vector<int>& nums, int target) { } };"
+  }
 }
 
 Ensure the content matches the real LeetCode problem if it's a known one (like "Two Sum").
-For "starterCode", provide the Java class structure. If helper classes (like TreeNode, ListNode) are needed, include them as comments or class definitions BEFORE the Solution class.
-Return ONLY valid JSON. No conversational text.
+For "starterCode", provide an object with keys "java" and "cpp", containing the respective class structures.
+For Java, include helper classes (like TreeNode, ListNode) as comments or definitions BEFORE the Solution class if needed.
+For C++, use standard vector/string includes and "using namespace std;" if appropriate, or fully qualify types. The solution should be within a "Solution" class. Return ONLY valid JSON. No conversational text.
 `;
 }
 
