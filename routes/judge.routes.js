@@ -5,14 +5,17 @@ import { supabase } from "../config/supabase.js";
 
 const router = express.Router();
 
+/* =========================
+   SUBMIT (Store in DB)
+========================= */
 router.post("/submit", async (req, res) => {
   try {
     const { name, problem, code, language } = req.body;
 
-    if (!problem || !code || !language) {
+    if (!name || !problem || !code || !language) {
       return res.status(400).json({
         success: false,
-        error: "problem, code and language required"
+        error: "name, problem, code and language required"
       });
     }
 
@@ -26,9 +29,15 @@ router.post("/submit", async (req, res) => {
       0
     );
 
+    // 🔥 Safe JSON Parsing
     let parsed;
     try {
-      parsed = JSON.parse(aiReply);
+      const cleaned = aiReply
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      parsed = JSON.parse(cleaned);
     } catch {
       return res.status(500).json({
         success: false,
@@ -37,7 +46,7 @@ router.post("/submit", async (req, res) => {
       });
     }
 
-    // 🔥 STORE IN SUPABASE
+    // 🔥 Store in Supabase
     const { data, error } = await supabase
       .from("submissions")
       .insert([
@@ -64,7 +73,65 @@ router.post("/submit", async (req, res) => {
 
     res.json({
       success: true,
+      mode: "submit",
       submission: data[0]
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+
+/* =========================
+   RUN (No DB Storage)
+========================= */
+router.post("/run", async (req, res) => {
+  try {
+    const { problem, code, language } = req.body;
+
+    if (!problem || !code || !language) {
+      return res.status(400).json({
+        success: false,
+        error: "problem, code and language required"
+      });
+    }
+
+    const prompt = buildJudgePrompt(problem, code, language);
+
+    const aiReply = await callAI(
+      [
+        { role: "system", content: "You are a coding evaluator." },
+        { role: "user", content: prompt }
+      ],
+      0
+    );
+
+    // 🔥 Safe JSON Parsing
+    let parsed;
+    try {
+      const cleaned = aiReply
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      parsed = JSON.parse(cleaned);
+    } catch {
+      return res.status(500).json({
+        success: false,
+        error: "AI returned invalid JSON",
+        raw: aiReply
+      });
+    }
+
+    // ❌ Do NOT store in DB
+    res.json({
+      success: true,
+      mode: "run",
+      result: parsed
     });
 
   } catch (err) {
