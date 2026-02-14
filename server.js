@@ -33,8 +33,10 @@ app.get("/", (req, res) => {
 });
 
 // ---------- ROUTES ----------
+import questionRoutes from "./routes/question.routes.js";
 app.use("/api/judge", judgeRoutes);
 app.use("/api/tutor", tutorRoutes);
+app.use("/api/question", questionRoutes);
 
 // ---------- 404 HANDLER ----------
 app.use((req, res) => {
