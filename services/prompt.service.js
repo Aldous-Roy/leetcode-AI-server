@@ -51,8 +51,8 @@ STRICT JSON FORMAT REQUIRED:
   ],
   "hints": ["Hint 1", "Hint 2"],
   "starterCode": {
-    "java": "class Solution { public int[] twoSum(int[] nums, int target) { } }",
-    "cpp": "class Solution { public: vector<int> twoSum(vector<int>& nums, int target) { } };"
+    "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}",
+    "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};"
   }
 }
 
@@ -60,6 +60,7 @@ Ensure the content matches the real LeetCode problem if it's a known one (like "
 For "starterCode", provide an object with keys "java" and "cpp", containing the respective class structures.
 For Java, include helper classes (like TreeNode, ListNode) as comments or definitions BEFORE the Solution class if needed.
 For C++, use standard vector/string includes and "using namespace std;" if appropriate, or fully qualify types. The solution should be within a "Solution" class. Return ONLY valid JSON. No conversational text.
+Ensure the code strings use "\\n" for newlines to be nicely formatted when displayed.
 `;
 }
 
