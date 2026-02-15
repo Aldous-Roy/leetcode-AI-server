@@ -46,7 +46,18 @@ router.post("/submit", async (req, res) => {
       });
     }
 
-    // 🔥 Store in Supabase
+    // �️ Delete existing submission for this user and problem (if any)
+    const { error: deleteError } = await supabase
+      .from("submissions")
+      .delete()
+      .match({ name, problem });
+
+    if (deleteError) {
+      console.error("Error deleting old submission:", deleteError);
+      // We continue anyway to try inserting the new one
+    }
+
+    // �🔥 Store in Supabase
     const { data, error } = await supabase
       .from("submissions")
       .insert([
