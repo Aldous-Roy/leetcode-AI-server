@@ -34,9 +34,12 @@ app.get("/", (req, res) => {
 
 // ---------- ROUTES ----------
 import questionRoutes from "./routes/question.routes.js";
+import submissionsRoutes from "./routes/submissions.routes.js";
+
 app.use("/api/judge", judgeRoutes);
 app.use("/api/tutor", tutorRoutes);
 app.use("/api/question", questionRoutes);
+app.use("/api/submissions", submissionsRoutes);
 
 // ---------- 404 HANDLER ----------
 app.use((req, res) => {
